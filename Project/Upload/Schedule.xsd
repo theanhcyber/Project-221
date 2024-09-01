@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="ScheduleData">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Schedules">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Schedule" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ClassId" type="xs:int"/>
+										<xs:element name="SubjectId" type="xs:int"/>
+										<xs:element name="TeacherId" type="xs:int"/>
+										<xs:element name="RoomId" type="xs:int"/>
+										<xs:element name="DayOfWeek" type="xs:int"/>
+										<xs:element name="Slot" type="xs:int"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

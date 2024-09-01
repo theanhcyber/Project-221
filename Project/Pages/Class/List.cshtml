@@ -1,0 +1,227 @@
+﻿@page
+@model Project.Pages.Class.ListModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@removeTagHelper Microsoft.AspNetCore.Mvc.TagHelpers.OptionTagHelper, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Project.Models
+@{
+}
+
+<div class="container">
+    <h1>Class List</h1>
+
+    <div class="header-buttons">
+        <button class="btn">
+            <a href="/Index">Return</a>
+        </button>
+        <button class="btn" id="addButton">Add Class</button>
+    </div>
+
+    <div class="search-sort">
+        <form method="post" asp-page-handler="searchclass">
+            <div class="form-group">
+                <label for="searchName">Search Name:</label>
+                <input type="text" id="searchName" name="SearchName" value="@Model.SearchName" />
+            </div>
+            <div class="form-group">
+                <label for="searchTotal">Total number of Students:</label>
+                <input type="number" id="searchTotal" name="SearchTotal" value="@Model.SearchTotal" />
+            </div>
+            <div class="form-group">
+                <label for="sortType">Sort Type:</label>
+                <select id="sortType" name="SortType">
+                    @foreach (var s in Model.SortTypes)
+                    {
+                        <option value="@s" @(s == Model.SelectedSortType ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sortOrder">Sort Order:</label>
+                <select id="sortOrder" name="SortOrder">
+                    @foreach (var s in Model.SortOrders)
+                    {
+                        <option value="@s" @(s == Model.SelectedSortOrder ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn">Search</button>
+        </form>
+    </div>
+
+    <div id="addForm" class="form-popup">
+        <form method="post" asp-page-handler="addclass">
+            <div class="form-group">
+                <label for="className">Class Name:</label>
+                <input type="text" id="className" name="ClassName" maxlength="10" required/>
+            </div>
+            <button type="submit" class="btn">Submit</button>
+        </form>
+    </div>
+
+    <div class="table-container">
+        @if (Model.Classes == null || Model.Classes.Count == 0)
+        {
+            <p>No Class Found!</p>
+        }
+        else
+        {
+            <table class="class-table">
+                <thead>
+                    <tr>
+                        <th>Class ID</th>
+                        <th>Class Name</th>
+                        <th>Total Students in Class</th>
+                        <th>Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Class c in Model.Classes)
+                    {
+                        <tr>
+                            <td>@c.Id</td>
+                            <td>
+                                <form method="post" asp-page-handler="editclass">
+                                    <input type="text" name="Name" value="@c.Name" maxlength="10" required />
+                                    <input type="hidden" name="ClassID" value="@c.Id" />
+                                    <button type="submit" class="btn">Update</button>
+                                </form>
+                            </td>
+                            <td>@c.TotalStudent</td>
+                            <td>
+                                <form method="post" onsubmit="return confirmDelete()">
+                                    <button type="submit" asp-page-handler="deleteclass" name="ClassID" value="@c.Id" class="btn">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<style>
+    .container {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin: 5px;
+    }
+
+        .btn a {
+            color: white;
+            text-decoration: none;
+        }
+
+    .search-sort {
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+    .form-popup {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .message {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .class-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .class-table th,
+        .class-table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .class-table th {
+            background-color: #f2f2f2;
+        }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+<script>
+    document.getElementById('addButton').addEventListener('click', function () {
+        var addForm = document.getElementById('addForm');
+        addForm.style.display = addForm.style.display === 'block' ? 'none' : 'block';
+    });
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/classHub")
+        .build();
+
+    connection.start()
+        .then(() => console.log("Connected to SignalR Hub"))
+        .catch(err => console.error("Error connecting to SignalR Hub: ", err));
+
+    connection.on("Receive Class Update", message => {
+        console.log("Received message from Hub: ", message);
+        alert(message);
+        location.reload();
+    });
+
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this class?");
+    }
+</script>

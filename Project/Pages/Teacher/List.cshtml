@@ -1,0 +1,392 @@
+﻿@page
+@model Project.Pages.Teacher.ListModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@removeTagHelper Microsoft.AspNetCore.Mvc.TagHelpers.OptionTagHelper, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Project.Models
+@{
+    var result = ViewData["result"];
+}
+
+<div class="container">
+    <h1>Teacher List</h1>
+
+    <div class="header-buttons">
+        <button class="btn">
+            <a href="/Index">Return</a>
+        </button>
+        <button class="btn" id="addButton">Add Teacher</button>
+    </div>
+
+    <div class="search-sort">
+        <form method="post" asp-page-handler="searchteacher">
+            <div class="form-group">
+                <label for="searchName">Search Name:</label>
+                <input type="text" id="searchName" name="SearchName" value="@Model.SearchName" />
+            </div>
+            <div class="form-group">
+                <label for="searchPhone">Phone:</label>
+                <input type="text" id="searchPhone" name="SearchPhone" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits only" value="@Model.SearchPhone" />
+            </div>
+            <div class="form-group">
+                <label for="searchDoB">Date of Birth:</label>
+                <input type="date" id="searchDoB" name="SearchDoB" value="@(Model.SearchDoB.HasValue ? Model.SearchDoB.Value.ToString("yyyy-MM-dd") : "")" />
+            </div>
+            <div class="form-group">
+                <label for="searchGender">Gender:</label>
+                <select id="searchGender" name="SearchGender">
+                    @foreach (var s in Model.SearchGenders)
+                    {
+                        <option value="@s" @(s == Model.SearchGender ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchIsActive">Is Active:</label>
+                <select id="searchIsActive" name="SearchIsActive">
+                    @foreach (var s in Model.SearchStatus)
+                    {
+                        <option value="@s" @(s == Model.SearchIsActive ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sortType">Sort Type:</label>
+                <select id="sortType" name="SortType">
+                    @foreach (var s in Model.SortTypes)
+                    {
+                        <option value="@s" @(s == Model.SelectedSortType ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sortOrder">Sort Order:</label>
+                <select id="sortOrder" name="SortOrder">
+                    @foreach (var s in Model.SortOrders)
+                    {
+                        <option value="@s" @(s == Model.SelectedSortOrder ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn">Search</button>
+        </form>
+    </div>
+
+    <div class="file-upload">
+        <p>XML Validation: @result</p>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" asp-for="Upload" />
+            <input type="submit" asp-page-handler="importfile" value="Upload" />
+        </form>
+
+        <form asp-page-handler="ExportTeachers">
+            <button type="submit" class="btn btn-primary">Export Teachers List</button>
+        </form>
+    </div>
+
+    <div id="addForm" class="form-popup">
+        <form method="post" asp-page-handler="addteacher">
+            <div class="form-group">
+                <label for="teacherName">Teacher Name:</label>
+                <input type="text" id="teacherName" name="TeacherName" maxlength="50" required />
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="DOB" required />
+            </div>
+            <div class="form-group">
+                <label>Gender:</label><br>
+                <input type="radio" id="genderMale" name="Gender" value="1" checked>
+                <label for="genderMale">Male</label><br>
+                <input type="radio" id="genderFemale" name="Gender" value="0">
+                <label for="genderFemale">Female</label>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="Phone" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits only" />
+            </div>
+            <div class="form-group">
+                <label for="isActive">Is Active:</label>
+                <input type="checkbox" id="isActive" name="IsActive" value="1" />
+            </div>
+            <button type="submit" class="btn">Submit</button>
+        </form>
+    </div>
+
+    <div class="table-container">
+        @if (Model.Teachers == null || Model.Teachers.Count == 0)
+        {
+            <p>No Teacher Found!</p>
+        }
+        else
+        {
+            <table class="teacher-table">
+                <thead>
+                    <tr>
+                        <th>Teacher ID</th>
+                        <th>Teacher Name</th>
+                        <th>Gender</th>
+                        <th>DoB</th>
+                        <th>Phone</th>
+                        <th>IsActive</th>
+                        <th>Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Teacher t in Model.Teachers)
+                    {
+                        <tr>
+                            <td>@t.Id</td>
+                            <td>@t.Name</td>
+                            <td>
+                                @if (t.Gender == 1)
+                                {
+                                    <span>Male</span>
+                                }
+                                else if (t.Gender == 0)
+                                {
+                                    <span>Female</span>
+                                }
+                            </td>
+                            <td>
+                                @if (t.DoB != null)
+                                {
+                                    @(((DateTime)@t.DoB).ToShortDateString())
+                                }
+                            </td>
+                            <td>@t.Phone</td>
+                            <td>
+                                @if (@t.Active == 1)
+                                {
+                                    <span>true</span>
+                                }
+                                else
+                                {
+                                    <span>false</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn" onclick="toggleEditForm('@t.Id', '@t.Name', '@t.DoB', '@t.Gender', '@t.Phone', '@t.Active')">Edit</button>
+                                @if (t.Active == 1)
+                                {
+                                    <form method="post">
+                                        <button type="submit" class="btn" asp-page-handler="deactiveteacher" name="TeacherID" value="@t.Id">Deactivate</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post">
+                                        <button type="submit" class="btn" asp-page-handler="reactiveteacher" name="TeacherID" value="@t.Id">Activate</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div id="editForm" class="form-popup">
+        <form method="post" asp-page-handler="editteacher">
+            <div class="form-group">
+                <label for="editTeacherId">Teacher ID:</label>
+                <input type="text" id="editTeacherId" name="TeacherId" readonly />
+            </div>
+            <div class="form-group">
+                <label for="editName">Teacher Name:</label>
+                <input type="text" id="editName" name="Name" maxlength="50" required/>
+            </div>
+            <div class="form-group">
+                <label for="editDoB">Date of Birth:</label>
+                <input type="date" id="editDoB" name="DoB" required />
+            </div>
+            <div class="form-group">
+                <label for="editGender">Gender:</label>
+                <select id="editGender" name="Gender">
+                    <option value="1">Male</option>
+                    <option value="0">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editPhone">Phone:</label>
+                <input type="tel" id="editPhone" name="Phone" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits only" />
+            </div>
+            <div class="form-group">
+                <label for="editActive">Active:</label>
+                <input type="checkbox" id="editActive" name="Active" value="1" />
+            </div>
+            <button type="submit" class="btn">Update</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin: 5px;
+    }
+
+        .btn a {
+            color: white;
+            text-decoration: none;
+        }
+
+    .search-sort,
+    .file-upload {
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+    .form-popup {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .message {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .teacher-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .teacher-table th,
+        .teacher-table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .teacher-table th {
+            background-color: #f2f2f2;
+        }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+<script>
+    document.getElementById('addButton').addEventListener('click', function () {
+        var addForm = document.getElementById('addForm');
+        if (addForm.style.display === 'block') {
+            addForm.style.display = 'none';
+        } else {
+            addForm.style.display = 'block';
+        }
+    });
+
+    function formatDate(date) {
+        var dateString = date.split(' ')[0];
+        var parts = dateString.split('/');
+        if (parts.length === 3) {
+            var day = parseInt(parts[0]);
+            var month = parseInt(parts[1]);
+            var year = parseInt(parts[2]);
+            var dateObj = new Date(year, month - 1, day);
+            if (!isNaN(dateObj.getTime())) {
+                return year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+            }
+        }
+        return null;
+    }
+
+    var lastEditTeacherId = null;
+    function toggleEditForm(id, name, dob, gender, phone, active) {
+        var editForm = document.getElementById('editForm');
+        var editTeacherIdInput = document.getElementById('editTeacherId');
+        var editNameInput = document.getElementById('editName');
+        var editDoBInput = document.getElementById('editDoB');
+        var editGenderInput = document.getElementById('editGender');
+        var editPhoneInput = document.getElementById('editPhone');
+        var editActiveInput = document.getElementById('editActive');
+
+        var formattedDob = formatDate(dob);
+
+        editTeacherIdInput.value = id;
+        editNameInput.value = name;
+        editDoBInput.value = formattedDob;
+        editGenderInput.value = gender;
+        editPhoneInput.value = phone;
+        editActiveInput.checked = parseInt(active) === 1;
+
+        if (editForm.style.display === 'block' && lastEditTeacherId === id) {
+            editForm.style.display = 'none';
+            lastEditTeacherId = null;
+        } else {
+            editForm.style.display = 'block';
+            lastEditTeacherId = id;
+        }
+
+        editNameInput.focus();
+    }
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/teacherHub")
+        .build();
+
+    connection.start()
+        .then(() => console.log("Connected to SignalR Hub"))
+        .catch(err => console.error("Error connecting to SignalR Hub: ", err));
+
+    connection.on("Receive Teacher Update", message => {
+        alert(message);
+        location.reload();
+    });
+</script>

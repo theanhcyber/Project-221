@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StudentData>
+    <Students>
+        <Student>
+            <Id>10</Id>
+            <Name>Nguyen Van A</Name>
+            <DoB>2000-01-01T00:00:00</DoB>
+            <Gender>1</Gender>
+            <Phone>0123456789</Phone>
+            <Active>1</Active>
+            <ClassId>11</ClassId>
+        </Student>
+        <Student>
+            <Id>11</Id>
+            <Name>Le Thi B</Name>
+            <DoB>1999-05-20T00:00:00</DoB>
+            <Gender>0</Gender>
+            <Phone>0987654321</Phone>
+            <Active>0</Active>
+            <ClassId>12</ClassId>
+        </Student>
+    </Students>
+</StudentData>

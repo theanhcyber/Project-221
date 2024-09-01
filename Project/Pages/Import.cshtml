@@ -1,0 +1,13 @@
+﻿@page
+@model Project.Pages.ImportModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    var result = ViewData["result"];
+}
+
+<h1>Import</h1>
+<p>XML Validation: @result</p>
+<form method="post" enctype="multipart/form-data">
+    <input type="file" asp-for ="Upload" />
+    <input type="submit" />
+</form>

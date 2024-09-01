@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScheduleData>
+  <Schedules>
+    <Schedule>
+      <ClassId>1</ClassId>
+      <SubjectId>1</SubjectId>
+      <TeacherId>1</TeacherId>
+      <RoomId>1</RoomId>
+      <DayOfWeek>2</DayOfWeek>
+      <Slot>4</Slot>
+    </Schedule>
+
+    <Schedule>
+      <ClassId>2</ClassId>
+      <SubjectId>2</SubjectId>
+      <TeacherId>2</TeacherId>
+      <RoomId>2</RoomId>
+      <DayOfWeek>2</DayOfWeek>
+      <Slot>1</Slot>
+    </Schedule>
+
+	<Schedule>
+      <ClassId>3</ClassId>
+      <SubjectId>3</SubjectId>
+      <TeacherId>3</TeacherId>
+      <RoomId>3</RoomId>
+      <DayOfWeek>3</DayOfWeek>
+      <Slot>3</Slot>
+    </Schedule>
+
+<Schedule>
+      <ClassId>4</ClassId>
+      <SubjectId>4</SubjectId>
+      <TeacherId>4</TeacherId>
+      <RoomId>4</RoomId>
+      <DayOfWeek>4</DayOfWeek>
+      <Slot>4</Slot>
+    </Schedule>
+
+<Schedule>
+      <ClassId>5</ClassId>
+      <SubjectId>5</SubjectId>
+      <TeacherId>5</TeacherId>
+      <RoomId>5</RoomId>
+      <DayOfWeek>9</DayOfWeek>
+      <Slot>5</Slot>
+    </Schedule>
+
+<Schedule>
+      <ClassId>5</ClassId>
+      <SubjectId>5</SubjectId>
+      <TeacherId>5</TeacherId>
+      <RoomId>5</RoomId>
+      <DayOfWeek>5</DayOfWeek>
+      <Slot>2</Slot>
+    </Schedule>
+
+  </Schedules>
+</ScheduleData>
